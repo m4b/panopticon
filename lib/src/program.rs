@@ -64,6 +64,31 @@ impl CallTarget {
             &CallTarget::Todo(_,_,uuid) => uuid,
         }
     }
+    pub fn name(&self) -> Option<&str> {
+        match self {
+            &CallTarget::Concrete(Function{ ref name,..}) => Some(name),
+            &CallTarget::Symbolic(ref name,_) => Some(name),
+            &CallTarget::Todo(_,Some(ref name),_) => Some(name),
+            _ => None,
+        }
+    }
+    pub fn display_with(&self, program: &Program) -> String {
+        match self {
+            &CallTarget::Concrete(ref f) => {
+                f.display_with(program)
+            },
+            &CallTarget::Symbolic(ref name, _) => {
+                format!("{} => ?", name)
+            },
+            &CallTarget::Todo(_ , ref name, ref uuid) => {
+                if let &Some(ref name) = name {
+                    format!("Todo: {}", name)
+                } else {
+                    format!("Todo: unknown - {}", &uuid)
+                }
+            }
+        }
+    }
 }
 
 /// Graph of functions/symbolic references
@@ -219,6 +244,17 @@ impl Program {
 
         None
     }
+
+    /// Returns the call target with given `name`.
+    pub fn find_call_target_by_name<'a>(&'a self, name2: &str) -> Option<&'a CallTarget> {
+        self.call_graph.vertices().find(|&x| match self.call_graph.vertex_label(x) {
+            Some(&CallTarget::Concrete(Function{ ref name, ..})) => name2 == name,
+            Some(&CallTarget::Symbolic(ref name, _)) => name2 == name,
+            Some(&CallTarget::Todo(_, Some(ref name), _)) => name2 == name,
+            _ => false,
+        }).and_then(|r| self.call_graph.vertex_label(r))
+    }
+
 }
 
 #[cfg(test)]

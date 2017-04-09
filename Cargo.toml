@@ -33,6 +33,10 @@ quickcheck = "0.3"
 
 [dev-dependencies]
 regex = "0.1"
+rayon = "0.7.0"
+serde = "0.9.13"
+serde_derive = "0.9.13"
+serde_json = "0.9.10"
 
 [dependencies.qmlrs]
 git = "https://github.com/flanfly/qmlrs"

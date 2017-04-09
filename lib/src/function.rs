@@ -51,6 +51,7 @@ use graph_algos::search::{
 use uuid::Uuid;
 
 use {
+    Program,
     BasicBlock,
     Guard,
     Region,
@@ -519,6 +520,23 @@ impl Function {
         }
 
         format!("{}\n}}",ret)
+    }
+
+    pub fn display_with(&self, program: &Program) -> String {
+        let mut bbs = self.cflow_graph.vertices().filter_map(|v| {
+            match self.cflow_graph.vertex_label(v) {
+                Some(&ControlFlowTarget::Resolved(ref bb)) => {
+                    Some (bb)
+                },
+                _ => None
+            }
+        }).collect::<Vec<&BasicBlock>>();
+        bbs.sort_by(|bb1, bb2| bb1.area.start.cmp(&bb2.area.start));
+        let mut fmt = format!("{}", self.name);
+        for bb in bbs {
+            fmt = format!("{}{}", fmt, bb.display_with(program));
+        }
+        fmt
     }
 }
 

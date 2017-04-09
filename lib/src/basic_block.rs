@@ -22,8 +22,10 @@
 //! Basic blocks always occupy a continuous byte range.
 
 use std::cmp::{min,max};
+use std::fmt;
 
 use {
+    Program,
     Mnemonic,
     Bound,
     Statement
@@ -87,6 +89,19 @@ impl BasicBlock {
                 f(i);
             }
         }
+    }
+    pub fn display_with(&self, program: &Program) -> String {
+        let seed = String::new();
+        let display = self.mnemonics.iter().filter_map(|x| {
+            if x.opcode.starts_with("__") {
+                None
+            } else {
+                Some(x)
+            }
+        }).collect::<Vec<_>>();
+        display.iter().fold(seed, |acc, ref m| -> String {
+            format!("{}\n{}", acc, m.display_with(program))
+        })
     }
 }
 
